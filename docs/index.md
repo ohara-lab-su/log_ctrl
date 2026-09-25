@@ -11,7 +11,7 @@ quickstart
 architecture
 usage
 rotation
-api/index
+api/modules
 ```
 
 ## 設計方針
