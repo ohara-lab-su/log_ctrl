@@ -1,0 +1,9 @@
+.idea/
+__pycache__/
+build/
+dist/
+*.egg-info/
+.run/
+# sphinx_docs/_build/
+sphinx_docs/soruce/
+sphinx_docs/locales/
