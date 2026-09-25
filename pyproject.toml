@@ -1,37 +1,53 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=40.8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "x_logger"
-
-version = "0.2.15"
-
-description = "logger"
-authors = [
-  { name="Kengo NAKADA", email="kengo.nakada@email.com" }
-]
+name = "log_server"
+version = "0.0.0"
+description = "gRPC server and proxy for reading x_logger rotating log files by device class."
 readme = "README.md"
-#requires-python = ">=3.8"
-requires-python = ">=3.7"
-
-dependencies = [
-"colorlog",
-"coloredlogs",
-#
-"sphinx",
-"myst-parser",
-"sphinx-autobuild",
-"sphinx-rtd-theme",
-"sphinxcontrib-napoleon",
-"linkify-it-py"
+requires-python = ">=3.6"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Kengo NAKADA", email = "kengo.nakada@email.com" }
 ]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+
+# grpc_frame is an external project used directly by this package.
+# Add it here only when its installable distribution name/source is fixed.
+dependencies = []
+
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "myst-parser",
+    "sphinx-rtd-theme",
+    "linkify-it-py",
+]
+test = [
+    "pytest",
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-
-# ここでpytestのiniと同じようにオプションが書ける
-# 例えばテストマーク、フィルタ、カバレッジなども追記可能
+testpaths = ["tests"]
 
 [tool.black]
 line-length = 88
