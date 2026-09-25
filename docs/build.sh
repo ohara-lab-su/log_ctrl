@@ -16,8 +16,10 @@ sphinx-apidoc \
   --module-first
 
 sphinx-build \
+  -W --keep-going \
   -b html \
   "$DOCS_DIR" \
   "$DOCS_DIR/_build/html"
 
+test -f "$DOCS_DIR/_build/html/index.html"
 touch "$DOCS_DIR/_build/html/.nojekyll"
