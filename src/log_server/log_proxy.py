@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 """DeviceClass 名を固定して LogServer を操作する LogProxy。"""
 
-from __future__ import annotations
+from typing import Any, List, Optional, Sequence, Tuple
 
-from typing import Any, Optional, Sequence, Tuple
-
-from grpc_frame.grpc_client import SyncGrpcClient
+from grpc_frame.grpc_client import GrpcClient
 
 
 class LogProxy:
@@ -26,7 +24,10 @@ class LogProxy:
             raise ValueError("device_class must be a non-empty string")
 
         self._device_class = device_class
-        self._client = SyncGrpcClient(
+
+        # 現行 SyncGrpcClient は grpc_options を super() へ渡していないため、
+        # options を正しく扱う基底 GrpcClient を直接使用する。
+        self._client = GrpcClient(
             server_ip=server_ip,
             server_port=server_port,
             timeout_sec=timeout_sec,
@@ -36,23 +37,32 @@ class LogProxy:
         )
 
     def read(self, date: Optional[str] = None) -> str:
-        """現在ログ、または指定日のローテーション済みログを取得する。"""
-        return self._client.read(self._device_class, date=date)
+        """現在または指定日のログ全文を streaming で取得して結合する。"""
+        chunks = self._client.stream_call(
+            "read",
+            self._device_class,
+            date=date,
+        )
+        return "".join(chunks)
 
     def tail(
         self,
         lines: int = 100,
         date: Optional[str] = None,
     ) -> str:
-        """現在ログ、または指定日のログ末尾を取得する。"""
-        return self._client.tail(self._device_class, lines=lines, date=date)
+        """現在または指定日のログ末尾を取得する。"""
+        return self._client.tail(
+            self._device_class,
+            lines=lines,
+            date=date,
+        )
 
-    def dates(self) -> list[str]:
-        """取得可能なローテーション済みログの日付一覧を返す。"""
+    def dates(self) -> List[str]:
+        """取得可能なローテーション済みログの日付を降順で返す。"""
         return self._client.dates(self._device_class)
 
     def exists(self, date: Optional[str] = None) -> bool:
-        """現在ログ、または指定日のログが存在するか返す。"""
+        """現在または指定日のログが存在するか返す。"""
         return self._client.exists(self._device_class, date=date)
 
     def close(self) -> None:
