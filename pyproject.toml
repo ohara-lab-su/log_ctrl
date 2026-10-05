@@ -34,6 +34,7 @@ docs = [
     "myst-parser",
     "sphinx-rtd-theme",
     "linkify-it-py",
+    "grpcio",
 ]
 test = [
     "pytest",
