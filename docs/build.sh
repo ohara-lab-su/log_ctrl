@@ -12,6 +12,7 @@ rm -rf "$DOCS_DIR/_build" "$DOCS_DIR/api"
 sphinx-apidoc \
   -o "$DOCS_DIR/api" \
   "$SRC_DIR/log_ctrl" \
+  "$SRC_DIR/log_ctrl/server_grpc/log_grpc_server.py" \
   --force \
   --module-first
 
