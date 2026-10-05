@@ -25,7 +25,7 @@ class LogCtrl:
             )
 
     def log_names(self) -> List[str]:
-        """実在する *.log / *.log.YYYY-MM-DD から log_name 一覧を返す。"""
+        """実在する .log / .log.YYYY-MM-DD ファイルから log_name 一覧を返す。"""
         names = set()
 
         for path in self._log_dir.iterdir():
