@@ -14,22 +14,53 @@ def main() -> None:
     )
 
     try:
-        print(client.log_names())
-        print(client.dates("aandd"))
-        raw_files = client.raw_files()
-        print(raw_files)
+        log_names = client.log_names()
+        print("log names:")
+        print(log_names)
 
-        data = client.read("aandd")
-        print(len(data))
+        if len(log_names) == 0:
+            print("no log files")
+            return
 
-        old_data = client.read(
-            "aandd",
-            date="2026-10-01",
-        )
-        print(len(old_data))
+        log_name = log_names[0]
+        print("selected log name:")
+        print(log_name)
 
-        raw_data = client.read_raw("aandd.log.2026-10-01")
-        print(len(raw_data))
+        dates = client.dates(log_name)
+        print("dates:")
+        print(dates)
+
+        print("raw files:")
+        print(client.raw_files())
+
+        print("current log:")
+        data = client.read(log_name)
+        print("bytes:", len(data))
+
+        if len(dates) > 0:
+            date = dates[-1]
+            print("historical log:")
+            print(date)
+
+            old_data = client.read(
+                log_name,
+                date=date,
+            )
+            print("bytes:", len(old_data))
+
+            raw_filename = (
+                log_name
+                + ".log."
+                + date
+            )
+
+            print("raw read:")
+            print(raw_filename)
+
+            raw_data = client.read_raw(
+                raw_filename
+            )
+            print("bytes:", len(raw_data))
 
     finally:
         client.close()
