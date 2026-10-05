@@ -1,9 +1,11 @@
 # log_server
 
-`log_server` は、各 DeviceServer が `x_logger` でローカル保存しているログを、
+`log_server` は、各 DeviceServer が `x_logger` (xlogger-py)
+でローカル保存しているログを、
 DeviceServer とは独立した gRPC サーバーから参照するためのパッケージです。
 
-DeviceServer 自体にはログ取得機能を追加しません。各 DeviceServer は従来どおり
+DeviceServer 自体にはログ取得機能を追加しません。
+各 DeviceServer は従来どおり
 `x_logger` のインスタンスを持ち、ログファイルへ書き込みます。`log_server` は
 そのファイルを read-only で参照します。
 
@@ -78,9 +80,9 @@ start/stop はなく、ライフサイクルは外側の gRPC server が管理�
 from log_server import LogProxy
 
 with LogProxy(
-    "Cobotta",
-    server_ip="127.0.0.1",
-    server_port=50060,
+        "Cobotta",
+        server_ip="127.0.0.1",
+        server_port=50060,
 ) as log:
     print(log.tail(lines=100))
     print(log.dates())

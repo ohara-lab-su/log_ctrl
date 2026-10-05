@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """LogProxy 使用例。"""
 
-from log_server import LogProxy
+from log_proxy import LogProxy
+
 
 with LogProxy(
     "Cobotta",

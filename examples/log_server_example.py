@@ -4,10 +4,11 @@
 
 from log_server import create_log_grpc_server
 
-LOG_DIR = "/var/log/device_servers"
+
+LOG_PREFIX = "/var/log/device_servers"
 PORT = 50060
 
-server = create_log_grpc_server(log_dir=LOG_DIR)
+server = create_log_grpc_server(log_prefix=LOG_PREFIX)
 server.add_insecure_port(f"[::]:{PORT}")
 server.start()
 server.wait_for_termination()

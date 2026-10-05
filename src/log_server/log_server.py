@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""x_logger の rotating ログを公開する gRPC ログサーバー。
+"""x_logger が保存したログを公開する gRPC ログサーバー。
 
-x_logger の TimedRotatingFileHandler(when="midnight") に合わせ、
-次のファイル名を扱う。
+デバイス用途では XLogger の logger_name を logical log ID として扱い、
+標準の保存配置を次のようにする。
 
-    <device_class>.log
-    <device_class>.log.YYYY-MM-DD
+    <log_prefix>/<logger_name>/<logger_name>.log
+    <log_prefix>/<logger_name>/<logger_name>.log.YYYY-MM-DD
 
-DeviceServer とは独立したプロセスとして起動する。
+現在ログは file / rotating のどちらでも参照できる。
+日付指定ログは TimedRotatingFileHandler(when="midnight") の履歴を扱う。
 """
 
 from datetime import datetime
@@ -21,22 +22,22 @@ class LogController:
 
     def __init__(
         self,
-        log_dir: Union[str, Path],
+        log_prefix: Union[str, Path],
         log_suffix: str = ".log",
         encoding: str = "utf-8",
     ) -> None:
-        self._log_dir = Path(log_dir).expanduser().resolve()
+        self._log_prefix = Path(log_prefix).expanduser().resolve()
         self._log_suffix = str(log_suffix)
         self._encoding = str(encoding)
 
-        if not self._log_dir.is_dir():
+        if not self._log_prefix.is_dir():
             raise NotADirectoryError(
-                f"log directory does not exist: {self._log_dir}"
+                f"log prefix does not exist: {self._log_prefix}"
             )
 
     def tail(
         self,
-        device_class: str,
+        logger_name: str,
         lines: int = 100,
         date: Optional[str] = None,
     ) -> str:
@@ -44,16 +45,20 @@ class LogController:
         if isinstance(lines, bool) or not isinstance(lines, int) or lines <= 0:
             raise ValueError("lines must be a positive integer")
 
-        path = self._resolve_log_path(device_class, date)
+        path = self._resolve_log_path(logger_name, date)
         return self._tail_file(path, lines)
 
-    def dates(self, device_class: str) -> List[str]:
-        """取得可能なローテーション済みログの日付を降順で返す。"""
-        base_name = self._base_name(device_class)
+    def dates(self, logger_name: str) -> List[str]:
+        """取得可能なローテーション済みログの日付を返す。"""
+        log_dir = self._logger_dir(logger_name)
+        base_name = self._base_name(logger_name)
         prefix = f"{base_name}."
         found = []
 
-        for path in self._log_dir.glob(f"{base_name}.*"):
+        if not log_dir.is_dir():
+            return found
+
+        for path in log_dir.glob(f"{base_name}.*"):
             suffix = path.name[len(prefix):]
             if self._is_date_string(suffix):
                 found.append(suffix)
@@ -62,13 +67,13 @@ class LogController:
 
     def exists(
         self,
-        device_class: str,
+        logger_name: str,
         date: Optional[str] = None,
     ) -> bool:
         """現在または指定日のログが存在するか返す。"""
         try:
             path = self._resolve_log_path(
-                device_class,
+                logger_name,
                 date,
                 require_exists=False,
             )
@@ -76,29 +81,40 @@ class LogController:
             return False
         return path.is_file()
 
-    def _base_name(self, device_class: str) -> str:
-        if not isinstance(device_class, str) or not device_class:
-            raise ValueError("device_class must be a non-empty string")
-        if Path(device_class).name != device_class or device_class in (".", ".."):
-            raise ValueError("device_class must not contain a path")
-        return f"{device_class}{self._log_suffix}"
+    def _validate_logger_name(self, logger_name: str) -> str:
+        if not isinstance(logger_name, str) or not logger_name:
+            raise ValueError("logger_name must be a non-empty string")
+        if Path(logger_name).name != logger_name:
+            raise ValueError("logger_name must not contain a path")
+        if logger_name in (".", ".."):
+            raise ValueError("logger_name must not contain a path")
+        return logger_name
+
+    def _logger_dir(self, logger_name: str) -> Path:
+        name = self._validate_logger_name(logger_name)
+        return self._log_prefix / name
+
+    def _base_name(self, logger_name: str) -> str:
+        name = self._validate_logger_name(logger_name)
+        return f"{name}{self._log_suffix}"
 
     def _resolve_log_path(
         self,
-        device_class: str,
+        logger_name: str,
         date_value: Optional[str],
         require_exists: bool = True,
     ) -> Path:
-        base_name = self._base_name(device_class)
+        log_dir = self._logger_dir(logger_name)
+        base_name = self._base_name(logger_name)
 
         if date_value is None:
-            path = self._log_dir / base_name
+            path = log_dir / base_name
         else:
             self._validate_date(date_value)
-            path = self._log_dir / f"{base_name}.{date_value}"
+            path = log_dir / f"{base_name}.{date_value}"
 
         if require_exists and not path.is_file():
-            raise FileNotFoundError(f"log file does not exist: {path.name}")
+            raise FileNotFoundError(f"log file does not exist: {path}")
         return path
 
     @staticmethod
@@ -155,11 +171,11 @@ class LogStream:
 
     def read(
         self,
-        device_class: str,
+        logger_name: str,
         date: Optional[str] = None,
     ) -> Iterator[str]:
         """ログ全文を文字列チャンクとして順次返す。"""
-        path = self._controller._resolve_log_path(device_class, date)
+        path = self._controller._resolve_log_path(logger_name, date)
         with path.open(
             "r",
             encoding=self._controller._encoding,
@@ -173,7 +189,7 @@ class LogStream:
 
 
 def create_log_grpc_server(
-    log_dir: Union[str, Path],
+    log_prefix: Union[str, Path],
     log_suffix: str = ".log",
     encoding: str = "utf-8",
     chunk_size: int = 256 * 1024,
@@ -186,7 +202,7 @@ def create_log_grpc_server(
     from grpc_frame.grpc_server import create_grpc_server
 
     controller = LogController(
-        log_dir=log_dir,
+        log_prefix=log_prefix,
         log_suffix=log_suffix,
         encoding=encoding,
     )

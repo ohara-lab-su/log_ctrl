@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""DeviceClass 名を固定して LogServer を操作する LogProxy。"""
+"""logger_name を固定して LogServer を操作する LogProxy。"""
 
 from typing import Any, List, Optional, Sequence, Tuple
 
@@ -8,11 +8,11 @@ from grpc_frame.grpc_client import GrpcClient
 
 
 class LogProxy:
-    """DeviceClass ごとのログアクセスを提供する薄い Proxy。"""
+    """一つの logical logger へアクセスする Proxy。"""
 
     def __init__(
         self,
-        device_class: str,
+        logger_name: str,
         server_ip: str,
         server_port: int,
         timeout_sec: Optional[float] = None,
@@ -20,13 +20,11 @@ class LogProxy:
         log_level: Optional[str] = None,
         grpc_options: Optional[Sequence[Tuple[str, Any]]] = None,
     ) -> None:
-        if not isinstance(device_class, str) or not device_class:
-            raise ValueError("device_class must be a non-empty string")
+        if not isinstance(logger_name, str) or not logger_name:
+            raise ValueError("logger_name must be a non-empty string")
 
-        self._device_class = device_class
+        self._logger_name = logger_name
 
-        # 現行 SyncGrpcClient は grpc_options を super() へ渡していないため、
-        # options を正しく扱う基底 GrpcClient を直接使用する。
         self._client = GrpcClient(
             server_ip=server_ip,
             server_port=server_port,
@@ -37,10 +35,10 @@ class LogProxy:
         )
 
     def read(self, date: Optional[str] = None) -> str:
-        """現在または指定日のログ全文を streaming で取得して結合する。"""
+        """現在または指定日のログ全文を取得する。"""
         chunks = self._client.stream_call(
             "read",
-            self._device_class,
+            self._logger_name,
             date=date,
         )
         return "".join(chunks)
@@ -52,24 +50,24 @@ class LogProxy:
     ) -> str:
         """現在または指定日のログ末尾を取得する。"""
         return self._client.tail(
-            self._device_class,
+            self._logger_name,
             lines=lines,
             date=date,
         )
 
     def dates(self) -> List[str]:
-        """取得可能なローテーション済みログの日付を降順で返す。"""
-        return self._client.dates(self._device_class)
+        """取得可能なローテーション済みログの日付を返す。"""
+        return self._client.dates(self._logger_name)
 
     def exists(self, date: Optional[str] = None) -> bool:
         """現在または指定日のログが存在するか返す。"""
-        return self._client.exists(self._device_class, date=date)
+        return self._client.exists(self._logger_name, date=date)
 
     def close(self) -> None:
         """gRPC channel を閉じる。"""
         self._client.close()
 
-    def __enter__(self) -> "LogProxy":
+    def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
