@@ -1,131 +1,180 @@
-# log_server
+# log_ctrl
 
-`log_server` は、各 DeviceServer が `x_logger` (xlogger-py)
-でローカル保存しているログを、
-DeviceServer とは独立した gRPC サーバーから参照するためのパッケージです。
+`log_ctrl`
+は、指定したログディレクトリに保存されているログファイルを、`grpc_frame`
+を使ってネットワーク越しに参照するためのパッケージです。
 
-DeviceServer 自体にはログ取得機能を追加しません。
-各 DeviceServer は従来どおり
-`x_logger` のインスタンスを持ち、ログファイルへ書き込みます。`log_server` は
-そのファイルを read-only で参照します。
+ログを書き込む側の DeviceServer やアプリケーションにはログ取得 RPC
+を追加しません。`log_ctrl` は既存のログファイルを read-only
+で参照する独立した gRPC サーバーとして動作します。
 
-```text
-DeviceServer("Cobotta")              LogServer
-  └─ x_logger                           ├─ LogController
-      ├─ Cobotta.log                    └─ LogStream
-      └─ Cobotta.log.YYYY-MM-DD              ↑
-                                              │ gRPC
-                                           LogProxy("Cobotta")
+``` text
+application / DeviceServer
+        │
+        │ write
+        ▼
+C:\opt\ese774\log
+├── cobotta4_server.log
+├── cobotta4_server.log.2026-04-06
+├── cobotta4_server2.log
+└── cobotta4_server2.log.2026-06-16
+        ▲
+        │ read only
+        │
+     LogCtrl
+        │
+        ▼
+ log gRPC server
+        │
+        ▼
+DeviceProxy("log", ...)
 ```
 
-## 前提となるログ形式
+## ログ名
 
-`x_logger` の `TimedRotatingFileHandler(when="midnight")` に合わせ、次の名前を扱います。
+`log_ctrl` では、`.log` より前の部分を `log_name` と呼びます。
 
-```text
-<device_class>.log
-<device_class>.log.YYYY-MM-DD
+``` text
+cobotta4_server.log
+^^^^^^^^^^^^^^^
+   log_name
 ```
 
-ログディレクトリは固定ではなく、LogServer 起動時に `log_dir` で指定します。
+ローテーション済みログは次の形式です。
+
+``` text
+<log_name>.log.YYYY-MM-DD
+```
+
+`log_name` は DeviceServer
+名やデバイスクラス名と一致する必要はありません。`log_ctrl`
+はファイル名として存在する `log_name` をそのまま扱います。
 
 ## 主な機能
 
-- DeviceClass 名によるログ指定
-- 現在ログの取得
-- `YYYY-MM-DD` を指定したローテーション済みログの取得
-- 利用可能なローテーション日付の一覧取得
-- ログ末尾の取得
-- ログ存在確認
-- 大きなログ本文の gRPC server-streaming
-- DeviceServer とは独立した LogServer プロセス
+-   `log_names()` : 実在するログファイルから `log_name` 一覧を取得
+-   `dates(log_name)` : 指定した `log_name`
+    のローテーション日付一覧を取得
+-   `exists(log_name, date=None)` : 現在ログまたは指定日ログの存在確認
+-   `tail(log_name, lines=100, date=None)` : ログ末尾を文字列で取得
+-   `raw_files()` : ログディレクトリ以下の全ファイルを相対パスで列挙
+-   `read(log_name, date=None)` : ログファイル本体を `bytes` で取得
+-   `read_raw(relative_path)` : `raw_files()` で確認した任意ファイルを
+    `bytes` で取得
+
+大きなログファイルは `grpc_frame` の `StreamCall`
+を使ってチャンク転送します。利用側ではストリーム処理を直接扱う必要はなく、`read()`
+/ `read_raw()` が受信したチャンクを結合して `bytes` として返します。
 
 ## インストール
 
-本パッケージは `grpc_frame` を利用します。`grpc_frame` を利用可能な環境で、
-このプロジェクトをインストールしてください。
+`grpc_frame` を利用可能な環境でインストールします。
 
-```bash
+``` bash
 python -m pip install .
 ```
 
-開発用:
+開発時は次のように editable install できます。
 
-```bash
+``` bash
 python -m pip install -e .
 ```
 
 ## LogServer の起動
 
-```python
-from log_server import create_log_grpc_server
+``` python
+from log_ctrl.server_grpc import log_grpc_server
 
-LOG_DIR = "/var/log/device_servers"
-PORT = 50060
+GRPC_HOST = "0.0.0.0"
+GRPC_PORT = 50060
+LOG_DIR = r"C:\opt\ese774\log"
 
-server = create_log_grpc_server(log_dir=LOG_DIR)
-server.add_insecure_port(f"[::]:{PORT}")
-server.start()
-server.wait_for_termination()
+log_grpc_server(
+    grpc_host=GRPC_HOST,
+    grpc_port=GRPC_PORT,
+    log_dir=LOG_DIR,
+)
 ```
 
-`LogController` と `LogStream` は同じ `LogController` インスタンスを共有します。
-`LogController` は `tail()`、`dates()`、`exists()` の通常 RPC を担当し、
-`LogStream` は `read()` の server-streaming を担当します。両者自身に独立した
-start/stop はなく、ライフサイクルは外側の gRPC server が管理します。
+`logger` を省略した場合は標準の `logging` が使用されます。既存の logger
+を使用する場合は `logger=` で渡せます。
 
 ## クライアント
 
-```python
-from log_server import LogProxy
+`grpc_frame` の透過クライアントとして `DeviceProxy` を使用します。
 
-with LogProxy(
-        "Cobotta",
-        server_ip="127.0.0.1",
-        server_port=50060,
-) as log:
-    print(log.tail(lines=100))
-    print(log.dates())
-    print(log.read(date="2026-09-24"))
+``` python
+from log_ctrl.server_grpc import DeviceProxy
+
+client = DeviceProxy(
+    "log",
+    server_ip="127.0.0.1",
+    server_port=50060,
+    set_timeout_sec=10.0,
+    async_mode=False,
+)
+
+try:
+    log_names = client.log_names()
+    print(log_names)
+
+    if len(log_names) > 0:
+        log_name = log_names[0]
+
+        print(client.dates(log_name))
+
+        if client.exists(log_name):
+            data = client.read(log_name)
+            print(len(data))
+
+finally:
+    client.close()
 ```
 
-### API
+`log_names()` で返される名前は、現在の `<log_name>.log`
+が存在する名前だけとは限りません。ローテーション済みファイルだけが残っている場合も一覧に含まれます。現在ログを読む前に必要に応じて
+`exists(log_name)` を確認してください。
 
-```python
-log.read()
-log.read(date="2026-09-24")
+## API
 
-log.tail(lines=100)
-log.tail(lines=100, date="2026-09-24")
+``` python
+client.log_names()
+client.dates(log_name)
 
-log.dates()
+client.exists(log_name)
+client.exists(log_name, date="2026-04-06")
 
-log.exists()
-log.exists(date="2026-09-24")
+client.tail(log_name, lines=100)
+client.tail(log_name, lines=100, date="2026-04-06")
+
+client.raw_files()
+
+client.read(log_name)
+client.read(log_name, date="2026-04-06")
+
+client.read_raw("cobotta4_server.log.2026-04-06")
 ```
 
-## Python バージョン
+`read()` と `read_raw()` の戻り値は `bytes`
+です。ログを文字列として扱う場合は、使用している文字コードに合わせてクライアント側で
+decode します。
 
-公開コードの型アノテーションは Python 3.5 形式の `typing` 記法を使用しています。
-f-string を使用しているため、実際の最低実行バージョンは Python 3.6 です。
+``` python
+text = client.read(log_name).decode("utf-8")
+```
+
+`tail()` はサーバー側で設定された `encoding` を使って decode され、`str`
+を返します。
 
 ## ドキュメント
 
-Sphinx ドキュメントは `docs/` にあります。
+Sphinx 用文書は `docs/` にあります。
 
-```bash
-cd docs
-bash build.sh
-```
-
-GitHub Pages 用 workflow は配布 ZIP 内では `github/workflows/pages.yml` として
-収録しています。リポジトリへ配置するときは `github` を `.github` に変更してください。
-
-## テスト
-
-```bash
-python -m pytest
-```
+-   `docs/index.md`
+-   `docs/quickstart.md`
+-   `docs/usage.md`
+-   `docs/rotation.md`
+-   `docs/architecture.md`
 
 ## License
 

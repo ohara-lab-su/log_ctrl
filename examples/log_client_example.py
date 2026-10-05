@@ -26,17 +26,21 @@ def main() -> None:
         log_name = log_names[0]
         print("selected log name:")
         print(log_name)
+        print("-----------------------------")
 
         dates = client.dates(log_name)
         print("dates:")
         print(dates)
+        print("-----------------------------")
 
         print("raw files:")
         print(client.raw_files())
+        print("-----------------------------")
 
         print("current log:")
         data = client.read(log_name)
         print("bytes:", len(data))
+        print("-----------------------------")
 
         if len(dates) > 0:
             date = dates[-1]
@@ -49,19 +53,14 @@ def main() -> None:
             )
             print("bytes:", len(old_data))
 
-            raw_filename = (
-                log_name
-                + ".log."
-                + date
-            )
+            raw_filename = log_name + ".log." + date
 
             print("raw read:")
             print(raw_filename)
 
-            raw_data = client.read_raw(
-                raw_filename
-            )
+            raw_data = client.read_raw(raw_filename)
             print("bytes:", len(raw_data))
+        print("-----------------------------")
 
     finally:
         client.close()
