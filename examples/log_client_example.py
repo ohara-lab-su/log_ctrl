@@ -1,15 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""LogProxy 使用例。"""
 
-from log_proxy import LogProxy
+from log_ctrl.server_grpc import DeviceProxy
 
 
-with LogProxy(
-    "Cobotta",
-    server_ip="127.0.0.1",
-    server_port=50060,
-) as log:
-    print(log.tail(lines=100))
-    print(log.dates())
-    print(log.read(date="2026-09-24"))
+def main() -> None:
+    client = DeviceProxy(
+        "log",
+        server_ip="127.0.0.1",
+        server_port=50060,
+        set_timeout_sec=10.0,
+        async_mode=False,
+    )
+
+    try:
+        print(client.log_names())
+        print(client.dates("aandd"))
+        raw_files = client.raw_files()
+        print(raw_files)
+
+        data = client.read("aandd")
+        print(len(data))
+
+        old_data = client.read(
+            "aandd",
+            date="2026-10-01",
+        )
+        print(len(old_data))
+
+        raw_data = client.read_raw("aandd.log.2026-10-01")
+        print(len(raw_data))
+
+    finally:
+        client.close()
+
+
+if __name__ == "__main__":
+    main()

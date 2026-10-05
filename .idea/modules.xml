@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/log_ctrl.iml" filepath="$PROJECT_DIR$/.idea/log_ctrl.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/log_server.iml" filepath="$PROJECT_DIR$/.idea/log_server.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/x_logger.iml" filepath="$PROJECT_DIR$/.idea/x_logger.iml" />
     </modules>

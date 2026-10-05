@@ -3,7 +3,7 @@ requires = ["setuptools>=40.8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "log_server"
+name = "log_ctrl"
 version = "0.0.0"
 description = "gRPC server and proxy for reading x_logger rotating log files by device class."
 readme = "README.md"
