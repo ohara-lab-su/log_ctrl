@@ -35,7 +35,7 @@ def log_grpc_server(
         logger: Optional[Any] = None,
         log_level: Optional[str] = None,
 ) -> None:
-    from log.server_grpc.log_grpc_server import log_grpc_server as _server
+    from log_ctrl.server_grpc.log_grpc_server import log_grpc_server as _server
 
     _server(
         grpc_host=grpc_host,

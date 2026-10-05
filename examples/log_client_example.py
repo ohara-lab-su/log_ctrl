@@ -7,7 +7,8 @@ from log_ctrl.server_grpc import DeviceProxy
 def main() -> None:
     client = DeviceProxy(
         "log",
-        server_ip="127.0.0.1",
+        # server_ip="127.0.0.1",
+        server_ip="10.170.10.41",
         server_port=50060,
         set_timeout_sec=10.0,
         async_mode=False,
