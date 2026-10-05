@@ -11,7 +11,7 @@ rm -rf "$DOCS_DIR/_build" "$DOCS_DIR/api"
 
 sphinx-apidoc \
   -o "$DOCS_DIR/api" \
-  "$SRC_DIR/log_server" \
+  "$SRC_DIR/log_ctrl" \
   --force \
   --module-first
 
