@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../src"))
 
-project = "log_server"
+project = "log_ctrl"
 author = "Kengo NAKADA"
 language = "ja"
 
