@@ -3,11 +3,8 @@
   <component name="FormatOnSaveOptions">
     <option name="myRunOnSave" value="true" />
   </component>
-  <component name="GithubDefaultAccount">
-    <option name="defaultAccountId" value="af8fd87d-9755-4cd7-b13f-cf553315be14" />
-  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="~\.pyenv\pyenv-win\versions\3.11.9\python.exe" project-jdk-type="Python SDK" />
 </project>

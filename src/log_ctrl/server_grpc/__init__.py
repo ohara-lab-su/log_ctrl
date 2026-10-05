@@ -6,8 +6,8 @@ from pathlib import Path
 
 from grpc_frame import DeviceProxy, register_device_proxy
 
-from log.server_grpc.async_log_grpc_client import AsyncLogGrpcClient
-from log.server_grpc.sync_log_grpc_client import SyncLogGrpcClient
+from log_ctrl.server_grpc.async_log_grpc_client import AsyncLogGrpcClient
+from log_ctrl.server_grpc.sync_log_grpc_client import SyncLogGrpcClient
 
 DEVICE_PROXY_NAME = "log"
 DEVICE_PROXY_ALIASES = [
@@ -15,7 +15,6 @@ DEVICE_PROXY_ALIASES = [
     "LogCtrl",
     "log_grpc",
 ]
-
 
 register_device_proxy(
     DEVICE_PROXY_NAME,
@@ -27,14 +26,14 @@ register_device_proxy(
 
 
 def log_grpc_server(
-    *,
-    grpc_host: str,
-    grpc_port: int,
-    log_dir: Union[str, Path],
-    encoding: str = "utf-8",
-    chunk_size: int = 256 * 1024,
-    logger: Optional[Any] = None,
-    log_level: Optional[str] = None,
+        *,
+        grpc_host: str,
+        grpc_port: int,
+        log_dir: Union[str, Path],
+        encoding: str = "utf-8",
+        chunk_size: int = 256 * 1024,
+        logger: Optional[Any] = None,
+        log_level: Optional[str] = None,
 ) -> None:
     from log.server_grpc.log_grpc_server import log_grpc_server as _server
 
@@ -50,14 +49,14 @@ def log_grpc_server(
 
 
 def log_server(
-    *,
-    grpc_host: str,
-    grpc_port: int,
-    log_dir: Union[str, Path],
-    encoding: str = "utf-8",
-    chunk_size: int = 256 * 1024,
-    logger: Optional[Any] = None,
-    log_level: Optional[str] = None,
+        *,
+        grpc_host: str,
+        grpc_port: int,
+        log_dir: Union[str, Path],
+        encoding: str = "utf-8",
+        chunk_size: int = 256 * 1024,
+        logger: Optional[Any] = None,
+        log_level: Optional[str] = None,
 ) -> None:
     log_grpc_server(
         grpc_host=grpc_host,
