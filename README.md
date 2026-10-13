@@ -1,5 +1,8 @@
 # log_ctrl
 
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/ohara-lab-su/log_ctrl/blob/main/README.en.md)
+[![ja](https://img.shields.io/badge/lang-ja-yellow.svg)](https://github.com/ohara-lab-su/log_ctrl/blob/main/README.md)
+
 `log_ctrl`
 は、指定したログディレクトリに保存されているログファイルを、`grpc_frame`
 を使ってネットワーク越しに参照するためのパッケージです。
@@ -52,15 +55,15 @@ cobotta4_server.log
 
 ## 主な機能
 
--   `log_names()` : 実在するログファイルから `log_name` 一覧を取得
--   `dates(log_name)` : 指定した `log_name`
-    のローテーション日付一覧を取得
--   `exists(log_name, date=None)` : 現在ログまたは指定日ログの存在確認
--   `tail(log_name, lines=100, date=None)` : ログ末尾を文字列で取得
--   `raw_files()` : ログディレクトリ以下の全ファイルを相対パスで列挙
--   `read(log_name, date=None)` : ログファイル本体を `bytes` で取得
--   `read_raw(relative_path)` : `raw_files()` で確認した任意ファイルを
-    `bytes` で取得
+- `log_names()` : 実在するログファイルから `log_name` 一覧を取得
+- `dates(log_name)` : 指定した `log_name`
+  のローテーション日付一覧を取得
+- `exists(log_name, date=None)` : 現在ログまたは指定日ログの存在確認
+- `tail(log_name, lines=100, date=None)` : ログ末尾を文字列で取得
+- `raw_files()` : ログディレクトリ以下の全ファイルを相対パスで列挙
+- `read(log_name, date=None)` : ログファイル本体を `bytes` で取得
+- `read_raw(relative_path)` : `raw_files()` で確認した任意ファイルを
+  `bytes` で取得
 
 大きなログファイルは `grpc_frame` の `StreamCall`
 を使ってチャンク転送します。利用側ではストリーム処理を直接扱う必要はなく、`read()`
@@ -170,11 +173,11 @@ text = client.read(log_name).decode("utf-8")
 
 Sphinx 用文書は `docs/` にあります。
 
--   `docs/index.md`
--   `docs/quickstart.md`
--   `docs/usage.md`
--   `docs/rotation.md`
--   `docs/architecture.md`
+- `docs/index.md`
+- `docs/quickstart.md`
+- `docs/usage.md`
+- `docs/rotation.md`
+- `docs/architecture.md`
 
 ## License
 
