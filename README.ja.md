@@ -1,7 +1,7 @@
 # log_ctrl
 
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/ohara-lab-su/log_ctrl/blob/main/README.en.md)
-[![ja](https://img.shields.io/badge/lang-ja-yellow.svg)](https://github.com/ohara-lab-su/log_ctrl/blob/main/README.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/ohara-lab-su/log_ctrl/blob/main/README.md)
+[![ja](https://img.shields.io/badge/lang-ja-yellow.svg)](https://github.com/ohara-lab-su/log_ctrl/blob/main/README.ja.md)
 
 `log_ctrl`
 は、指定したログディレクトリに保存されているログファイルを、`grpc_frame`

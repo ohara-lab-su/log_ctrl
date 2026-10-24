@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "log-ctrl"
-version = "0.0.3"
+version = "0.0.4"
 
 description = "gRPC server and proxy for reading x_logger rotating log files by device class."
 readme = "README.md"
