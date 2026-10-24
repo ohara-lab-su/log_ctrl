@@ -3,13 +3,12 @@
 [![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/ohara-lab-su/log_ctrl/blob/main/README.en.md)
 [![ja](https://img.shields.io/badge/lang-ja-yellow.svg)](https://github.com/ohara-lab-su/log_ctrl/blob/main/README.md)
 
-`log_ctrl`
-は、指定したログディレクトリに保存されているログファイルを、`grpc_frame`
-を使ってネットワーク越しに参照するためのパッケージです。
+`log_ctrl` is a package for accessing log files stored in a specified
+log directory over a network using `grpc_frame`.
 
-ログを書き込む側の DeviceServer やアプリケーションにはログ取得 RPC
-を追加しません。`log_ctrl` は既存のログファイルを read-only
-で参照する独立した gRPC サーバーとして動作します。
+It does not add log retrieval RPCs to the DeviceServer or application
+that writes the logs. `log_ctrl` runs as an independent, read-only gRPC
+server that accesses existing log files.
 
 ``` text
 application / DeviceServer
@@ -33,9 +32,9 @@ C:\opt\ese774\log
 DeviceProxy("log", ...)
 ```
 
-## ログ名
+## Log names
 
-`log_ctrl` では、`.log` より前の部分を `log_name` と呼びます。
+In `log_ctrl`, the part before `.log` is called the `log_name`.
 
 ``` text
 cobotta4_server.log
@@ -43,47 +42,52 @@ cobotta4_server.log
    log_name
 ```
 
-ローテーション済みログは次の形式です。
+Rotated log files use the following format:
 
 ``` text
 <log_name>.log.YYYY-MM-DD
 ```
 
-`log_name` は DeviceServer
-名やデバイスクラス名と一致する必要はありません。`log_ctrl`
-はファイル名として存在する `log_name` をそのまま扱います。
+The `log_name` does not need to match the DeviceServer name or device
+class name. `log_ctrl` uses the `log_name` exactly as it appears in the
+filename.
 
-## 主な機能
+## Main features
 
-- `log_names()` : 実在するログファイルから `log_name` 一覧を取得
-- `dates(log_name)` : 指定した `log_name`
-  のローテーション日付一覧を取得
-- `exists(log_name, date=None)` : 現在ログまたは指定日ログの存在確認
-- `tail(log_name, lines=100, date=None)` : ログ末尾を文字列で取得
-- `raw_files()` : ログディレクトリ以下の全ファイルを相対パスで列挙
-- `read(log_name, date=None)` : ログファイル本体を `bytes` で取得
-- `read_raw(relative_path)` : `raw_files()` で確認した任意ファイルを
-  `bytes` で取得
+- `log_names()`: Get the list of `log_name` values from existing log
+  files.
+- `dates(log_name)`: Get the list of rotation dates for the specified
+  `log_name`.
+- `exists(log_name, date=None)`: Check whether the current log or a
+  log for a specified date exists.
+- `tail(log_name, lines=100, date=None)`: Get the end of a log as a
+  string.
+- `raw_files()`: List all files under the log directory as relative
+  paths.
+- `read(log_name, date=None)`: Read a log file as `bytes`.
+- `read_raw(relative_path)`: Read an arbitrary file confirmed by
+  `raw_files()` as `bytes`.
 
-大きなログファイルは `grpc_frame` の `StreamCall`
-を使ってチャンク転送します。利用側ではストリーム処理を直接扱う必要はなく、`read()`
-/ `read_raw()` が受信したチャンクを結合して `bytes` として返します。
+Large log files are transferred in chunks using `grpc_frame`
+`StreamCall`. Client-side code does not need to handle the stream
+directly; `read()` and `read_raw()` join the received chunks and return
+them as `bytes`.
 
-## インストール
+## Installation
 
-`grpc_frame` を利用可能な環境でインストールします。
+Install in an environment where `grpc_frame` is available.
 
 ``` bash
 python -m pip install .
 ```
 
-開発時は次のように editable install できます。
+For development, use an editable install:
 
 ``` bash
 python -m pip install -e .
 ```
 
-## LogServer の起動
+## Starting LogServer
 
 ``` python
 from log_ctrl.server_grpc import log_grpc_server
@@ -99,12 +103,12 @@ log_grpc_server(
 )
 ```
 
-`logger` を省略した場合は標準の `logging` が使用されます。既存の logger
-を使用する場合は `logger=` で渡せます。
+If `logger` is omitted, the standard `logging` module is used. To use an
+existing logger, pass it with `logger=`.
 
-## クライアント
+## Client
 
-`grpc_frame` の透過クライアントとして `DeviceProxy` を使用します。
+Use `DeviceProxy` as the transparent `grpc_frame` client.
 
 ``` python
 from log_ctrl.server_grpc import DeviceProxy
@@ -134,9 +138,10 @@ finally:
     client.close()
 ```
 
-`log_names()` で返される名前は、現在の `<log_name>.log`
-が存在する名前だけとは限りません。ローテーション済みファイルだけが残っている場合も一覧に含まれます。現在ログを読む前に必要に応じて
-`exists(log_name)` を確認してください。
+The names returned by `log_names()` are not limited to names for which a
+current `<log_name>.log` file exists. A name is also included when only
+rotated log files remain. Check `exists(log_name)` as needed before
+reading the current log.
 
 ## API
 
@@ -158,20 +163,19 @@ client.read(log_name, date="2026-04-06")
 client.read_raw("cobotta4_server.log.2026-04-06")
 ```
 
-`read()` と `read_raw()` の戻り値は `bytes`
-です。ログを文字列として扱う場合は、使用している文字コードに合わせてクライアント側で
-decode します。
+`read()` and `read_raw()` return `bytes`. To handle a log as text,
+decode it on the client using the appropriate character encoding.
 
 ``` python
 text = client.read(log_name).decode("utf-8")
 ```
 
-`tail()` はサーバー側で設定された `encoding` を使って decode され、`str`
-を返します。
+`tail()` is decoded on the server using the configured `encoding` and
+returns `str`.
 
-## ドキュメント
+## Documentation
 
-Sphinx 用文書は `docs/` にあります。
+Sphinx documentation is available under `docs/`.
 
 - `docs/index.md`
 - `docs/quickstart.md`
@@ -181,4 +185,4 @@ Sphinx 用文書は `docs/` にあります。
 
 ## License
 
-`LICENSE` を参照してください。
+See `LICENSE`.

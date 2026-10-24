@@ -1,5 +1,8 @@
 # Usage
 
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://ohara-lab-su.github.io/log_ctrl/en/manual/usage.html)  [![ja](https://img.shields.io/badge/lang-ja-blue.svg)](https://ohara-lab-su.github.io/log_ctrl/ja/manual/usage.html)
+
+
 ## サーバー
 
 公開されているサーバー起動関数は

@@ -1,23 +1,31 @@
 # log_ctrl
 
-`log_ctrl` は、DeviceServer が `x_logger` で保存したログを、DeviceServer とは独立した
-gRPC LogServer から取得するためのパッケージです。
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://ohara-lab-su.github.io/log_ctrl/)
+[![ja](https://img.shields.io/badge/lang-ja-blue.svg)](https://ohara-lab-su.github.io/log_ctrl/ja/)
+
+`log_ctrl` retrieves logs written by DeviceServer through `x_logger` using a separate gRPC LogServer, independently of DeviceServer.
 
 ```{toctree}
 :maxdepth: 2
-:caption: Contents
+:caption: Guides
 
-quickstart
-architecture
-usage
-rotation
-api/modules
+manual/quickstart
+manual/architecture
+manual/usage
+manual/rotation
 ```
 
-## 設計方針
+```{toctree}
+:maxdepth: 2
+:caption: API Reference
 
-DeviceServer は機器操作の透過性を維持し、ログ配信の責務を持ちません。
-LogCtrl は指定されたログディレクトリを read-only で参照します。
+api/index
+```
+
+## Design policy
+
+DeviceServer remains responsible for transparent device operations, not log distribution.
+LogCtrl accesses the specified log directory in read-only mode.
 
 ```text
 DeviceServer A ─ x_logger ─┐
