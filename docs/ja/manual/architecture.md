@@ -1,5 +1,8 @@
 # Architecture
 
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://ohara-lab-su.github.io/log_ctrl/en/manual/architecture.html)  [![ja](https://img.shields.io/badge/lang-ja-blue.svg)](https://ohara-lab-su.github.io/log_ctrl/ja/manual/architecture.html)
+
+
 ## 全体構成
 
 `log_ctrl` はログを書き込むプロセスとは独立しています。

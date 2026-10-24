@@ -5,33 +5,36 @@
 
 ## v0.0.1
 
-PyPI 公開準備。
+Preparation for publication on PyPI.
 
-### 変更内容
+### Changes
 
-- PyPI 公開に向けたパッケージ公開準備。
-- 英語版 README (`README.en.md`) を追加。
-- CHANGELOG を追加。
-- 日本語版 CHANGELOG (`CHANGELOG.md`) と英語版 CHANGELOG (`CHANGELOG.en.md`) を用意。
+- Prepared the package for publication on PyPI.
+- Added the English README (`README.en.md`).
+- Added the changelog.
+- Added a Japanese changelog (`CHANGELOG.md`) and an English changelog (`CHANGELOG.en.md`).
 
-機能面の変更はありません。
+There are no functional changes in this version.
 
 ## v0.0.0
 
-初期バージョン。
+Initial version.
 
-### 実装内容
+### Implemented
 
-- `LogCtrl` によるログディレクトリの読み取り専用参照。
-- 現在ログおよびローテーション済みログの `log_name` 一覧取得。
-- 指定した `log_name` のローテーション日付一覧取得。
-- 現在ログおよび日付指定ログの存在確認。
-- ログ末尾を取得する `tail()`。
-- ログディレクトリ以下のファイルを相対パスで列挙する `raw_files()`。
-- ログファイルを `bytes` で取得する `read()`。
-- 相対パスを指定してファイルを `bytes` で取得する `read_raw()`。
-- ログディレクトリ外へのアクセスを防止するパス検証。
-- `grpc_frame` を利用した独立したログ gRPC サーバー。
-- `StreamCall` を利用したログファイルのチャンク転送。
-- 同期 gRPC クライアント `SyncLogGrpcClient`。
-- 非同期 gRPC クライアント `AsyncLogGrpcClient`。
+- Read-only access to a log directory through `LogCtrl`.
+- Discovery of `log_name` values from current and rotated log files.
+- Retrieval of rotation dates for a specified `log_name`.
+- Existence checks for current and date-specific log files.
+- `tail()` for retrieving the end of a log.
+- `raw_files()` for listing files under the log directory as relative
+  paths.
+- `read()` for retrieving log files as `bytes`.
+- `read_raw()` for retrieving a file specified by a relative path as
+  `bytes`.
+- Path validation to prevent access outside the configured log
+  directory.
+- An independent log gRPC server based on `grpc_frame`.
+- Chunked log-file transfer using `StreamCall`.
+- Synchronous gRPC client `SyncLogGrpcClient`.
+- Asynchronous gRPC client `AsyncLogGrpcClient`.

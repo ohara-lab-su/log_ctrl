@@ -1,5 +1,8 @@
 # Quick Start
 
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://ohara-lab-su.github.io/log_ctrl/en/manual/quickstart.html)  [![ja](https://img.shields.io/badge/lang-ja-blue.svg)](https://ohara-lab-su.github.io/log_ctrl/ja/manual/quickstart.html)
+
+
 ## 1. ログディレクトリを確認する
 
 たとえばログディレクトリが次の状態だとします。
