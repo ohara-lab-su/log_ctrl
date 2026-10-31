@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "log-ctrl"
 version = "0.0.4"
 
-description = "gRPC server and proxy for reading x_logger rotating log files by device class."
+description = "gRPC-based remote log access for Python device systems using x_logger rotating log files."
 readme = "README.md"
 requires-python = ">=3.6"
 license = { file = "LICENSE" }
@@ -31,6 +31,12 @@ classifiers = [
 dependencies = [
     "xlogger-py"
 ]
+
+[project.urls]
+Homepage = "https://ohara-lab-su.github.io/log_ctrl/"
+Documentation = "https://ohara-lab-su.github.io/log_ctrl/"
+Repository = "https://github.com/ohara-lab-su/log_ctrl"
+Issues = "https://github.com/ohara-lab-su/log_ctrl/issues"
 
 [project.optional-dependencies]
 docs = [
